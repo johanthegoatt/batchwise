@@ -335,7 +335,7 @@
       var whole = Math.floor(q + 0.15), part = q - whole;
       if (part < 0.15) part = 0;
       res.amount = part ? nice(q, [[0, ""], [1 / 4, "¼"], [1 / 3, "⅓"], [1 / 2, "½"], [2 / 3, "⅔"], [3 / 4, "¾"], [1, ""]]) : String(whole);
-      res.name = eggNoun(p.name, part ? 2 : whole);
+      res.name = eggNoun(p.name, q > 1 + 1e-9 ? 2 : 1);
       res.grams = q * e.g;
       if (part) {
         res.odd = true;
