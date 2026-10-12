@@ -1,0 +1,10 @@
+{
+  "name": "batchwise",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Make any recipe bigger, smaller or fit your pan, in cups, spoons or grams. With Scoop the measuring cup.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
