@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batchwise: make any recipe bigger, smaller or fit your pan</title>
+<meta name="description" content="Paste a recipe, pick how many it should feed or which pan you have, and get amounts you can measure: cups and spoons or grams, eggs included.">
+<meta name="theme-color" content="#c8553d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M10 16h40l-4 38H14z' fill='%23fbe3d6' stroke='%23c8553d' stroke-width='4' stroke-linejoin='round'/%3E%3Ccircle cx='24' cy='32' r='4' fill='%233b2a24'/%3E%3Ccircle cx='38' cy='32' r='4' fill='%233b2a24'/%3E%3Cpath d='M24 42q7 6 14 0' stroke='%233b2a24' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#result">Skip to the new amounts</a>
+<header class="top">
+  <h1>Batchwise</h1>
+  <p class="lede">Make any recipe bigger, smaller or fit the pan you have, with amounts you can actually measure.</p>
+</header>
+
+<main>
+  <section class="card" id="step-recipe" aria-labelledby="h-recipe">
+    <h2 id="h-recipe"><span class="num">1</span> Paste the ingredients</h2>
+    <label for="title" class="sr">Recipe name</label>
+    <input id="title" class="title-in" placeholder="Recipe name (optional)" maxlength="60" autocomplete="off">
+    <label for="recipe" class="sr">Ingredients, one per line</label>
+    <textarea id="recipe" rows="9" spellcheck="false" placeholder="One per line, the way the recipe writes it:
+2 1/4 cups flour
+1 tsp baking soda
+2 large eggs"></textarea>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="try-example">Try an example</button>
+      <label class="sys">
+        <span>Cups and spoons from</span>
+        <select id="system">
+          <option value="us">the US</option>
+          <option value="metric">the UK, Canada or NZ</option>
+          <option value="au">Australia</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="card" id="step-size" aria-labelledby="h-size">
+    <h2 id="h-size"><span class="num">2</span> How much do you want?</h2>
+    <div class="modes" role="tablist" aria-label="Scale by">
+      <button type="button" role="tab" class="mode" data-mode="serves" aria-selected="true">People</button>
+      <button type="button" role="tab" class="mode" data-mode="times" aria-selected="false">Times</button>
+      <button type="button" role="tab" class="mode" data-mode="pan" aria-selected="false">Pan</button>
+    </div>
+
+    <div class="pane" data-pane="serves">
+      <div class="serves">
+        <label>Recipe makes <input type="number" id="from-serves" min="1" max="500" value="4" inputmode="numeric"></label>
+        <span aria-hidden="true">→</span>
+        <label>I need <input type="number" id="to-serves" min="1" max="500" value="6" inputmode="numeric"></label>
+      </div>
+    </div>
+
+    <div class="pane" data-pane="times" hidden>
+      <div class="chips" id="times-chips">
+        <button type="button" class="chip" data-f="0.5">½</button>
+        <button type="button" class="chip" data-f="0.333333">⅓</button>
+        <button type="button" class="chip" data-f="1.5">1½×</button>
+        <button type="button" class="chip" data-f="2">2×</button>
+        <button type="button" class="chip" data-f="3">3×</button>
+      </div>
+      <label class="times-in">Or type it <input type="number" id="times" min="0.05" max="50" step="0.05" value="2" inputmode="decimal"> ×</label>
+    </div>
+
+    <div class="pane" data-pane="pan" hidden>
+      <div class="pans">
+        <fieldset>
+          <legend>The recipe's pan</legend>
+          <div class="pan-row" id="pan-from"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Your pan</legend>
+          <div class="pan-row" id="pan-to"></div>
+        </fieldset>
+      </div>
+      <p class="hint" id="pan-hint"></p>
+    </div>
+
+    <p class="factor" id="factor" aria-live="polite"></p>
+  </section>
+
+  <section class="card" id="result" aria-labelledby="h-result" tabindex="-1">
+    <h2 id="h-result"><span class="num">3</span> Your new amounts</h2>
+    <div class="units" role="radiogroup" aria-label="Show amounts in">
+      <label><input type="radio" name="units" value="as" checked> As written</label>
+      <label><input type="radio" name="units" value="cups"> Cups &amp; spoons</label>
+      <label><input type="radio" name="units" value="grams"> Grams</label>
+    </div>
+    <p id="result-empty" class="empty">Paste some ingredients above and the new amounts show up here.</p>
+    <ul id="list" class="list"></ul>
+    <div class="actions" id="result-actions" hidden>
+      <button type="button" class="btn" id="copy-list">Copy the list</button>
+      <button type="button" class="btn ghost" id="copy-link">Copy share link</button>
+      <button type="button" class="btn ghost" id="print">Print</button>
+    </div>
+    <p class="hint" id="result-hint" hidden>Tap a line to tick it off as it goes in the bowl. Grams come from King Arthur Baking's weight chart.</p>
+  </section>
+
+  <p class="toast" id="toast" role="status" aria-live="polite"></p>
+</main>
+
+<footer class="foot">
+  <span>Made by <a href="https://johanthegoat.xyz">Johan</a></span>
+  <span><a href="https://github.com/johanthegoatt/batchwise">Source on GitHub</a></span>
+  <button type="button" class="linkish" id="start-over">Start over</button>
+</footer>
+
+<div class="scoop-dock" id="scoop-dock">
+  <div class="bubble" id="scoop-bubble" role="status" aria-live="polite"></div>
+  <button type="button" class="scoop" id="scoop" aria-label="Scoop the measuring cup. Tap for a tip." data-mood="sleepy">
+    <svg viewBox="0 0 130 120" aria-hidden="true" focusable="false">
+      <g class="s-body">
+        <path class="s-handle" d="M98 44h14a10 10 0 0 1 10 10v8a10 10 0 0 1-10 10H96" fill="none" stroke-width="9" stroke-linecap="round"/>
+        <path class="s-cup" d="M14 26h88l-9 78a8 8 0 0 1-8 7H31a8 8 0 0 1-8-7z" stroke-width="4" stroke-linejoin="round"/>
+        <path class="s-fill" d="M20 74q40 -10 76 0l-4 30a6 6 0 0 1-6 5H32a6 6 0 0 1-6-5z"/>
+        <ellipse class="s-rim" cx="58" cy="26" rx="44" ry="7" stroke-width="4"/>
+        <path class="s-tick" d="M88 50h-8M89 62h-12M90 74h-8" stroke-width="3" stroke-linecap="round"/>
+        <g class="s-eyes">
+          <ellipse class="s-white" cx="44" cy="54" rx="8.5" ry="9.5"/>
+          <ellipse class="s-white" cx="68" cy="54" rx="8.5" ry="9.5"/>
+          <circle class="s-pupil" cx="44" cy="55" r="4.2"/>
+          <circle class="s-pupil" cx="68" cy="55" r="4.2"/>
+          <path class="s-lid" d="M35 52q9-7 18 0M59 52q9-7 18 0"/>
+        </g>
+        <circle class="s-cheek" cx="34" cy="68" r="4.5"/>
+        <circle class="s-cheek" cx="78" cy="68" r="4.5"/>
+        <path class="s-mouth happy" d="M48 70q8 8 16 0"/>
+        <path class="s-mouth worried" d="M48 75q8-6 16 0"/>
+        <ellipse class="s-mouth wow" cx="56" cy="73" rx="4.5" ry="5.5"/>
+        <path class="s-mouth sleepy" d="M50 72h12"/>
+      </g>
+    </svg>
+  </button>
+  <button type="button" class="scoop-hide" id="scoop-hide" aria-label="Hide Scoop">×</button>
+</div>
+
+<script src="src/engine.js"></script>
+<script src="src/scoop.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>
