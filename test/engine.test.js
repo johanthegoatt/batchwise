@@ -109,3 +109,14 @@ test("reads the fraction slash recipe sites paste in", () => {
   assert.equal(B.parseLine("1 1⁄2 tsp salt").qty, 1.5);
   assert.equal(line("1⁄2 cup sugar", 2).line, "1 cup sugar");
 });
+
+test("juice and zest of a fruit scale the fruit", () => {
+  assert.equal(line("juice of 1 lemon", 0.5).line, "juice of ½ lemon");
+  assert.equal(line("- zest and juice of 2 limes", 1.5).line, "zest and juice of 3 limes");
+});
+
+test("part of a sized can or package also says the amount to measure", () => {
+  assert.equal(line("1 (8 oz) package cream cheese", 0.5).note, "about 4 oz");
+  assert.equal(line("1 can (400 g) chickpeas", 0.5).note, "about 200 g");
+  assert.equal(line("2 (14 oz) cans tomatoes", 1).note, "");
+});

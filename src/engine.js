@@ -157,8 +157,14 @@
     if (!line.trim()) { out.kind = "blank"; return out; }
     if (/:$/.test(line.trim()) && !/\d/.test(line)) { out.kind = "heading"; return out; }
     // Recipe sites write "1⁄2" with the fraction slash (U+2044), not "/".
-    var m = line.replace(/[\u2044\u2215]/g, "/").match(LEAD);
+    var text = line.replace(/[\u2044\u2215]/g, "/");
+    // "juice of 1 lemon": the number sits after the words it scales.
+    var of = text.match(/^\s*(?:[-*•]\s*)?((?:the\s+)?(?:juice|zest|zest and juice|juice and zest|seeds)\s+of\s+)(.*)$/i);
+    var prefix = "";
+    if (of) { prefix = of[1]; text = of[2]; }
+    var m = text.match(LEAD);
     if (!m) { out.kind = "text"; return out; }
+    out.prefix = prefix;
     out.qty = toNumber(m[1]);
     out.max = m[2] ? toNumber(m[2]) : null;
     if (!isFinite(out.qty) || out.qty <= 0) { out.qty = null; out.kind = "text"; return out; }
@@ -318,7 +324,7 @@
   function scaleLine(p, factor, opts) {
     opts = opts || {};
     var sys = opts.system || "us", units = opts.units || "as";
-    var res = { raw: p.raw, kind: p.kind, name: p.name, amount: "", note: "", grams: null, odd: false };
+    var res = { raw: p.raw, kind: p.kind, name: p.name, amount: "", note: "", grams: null, odd: false, prefix: p.prefix || "" };
     if (p.qty == null) { res.amount = ""; return res; }
     var q = p.qty * factor, q2 = p.max != null ? p.max * factor : null;
     var dens = density(p.name);
@@ -382,7 +388,20 @@
     res.amount = range(countText(q), q2 != null && countText(q2));
     if (p.unit !== "count") res.amount += " " + (p.size || "") + (q > 1 + 1e-9 || (q2 || 0) > 1 ? pluralUnit(p.unit) : p.unit);
     if (Math.abs(q * 2 - Math.round(q * 2)) > 0.1 && p.unit === "count") res.odd = true;
+    // Half a 14 oz can is easier to measure as 7 oz than to eyeball.
+    var inner = q2 == null && Math.abs(q - Math.round(q)) > 0.05 && packageSize(p.size || p.name);
+    if (inner) res.note = "about " + (inner.kind === "weight"
+      ? (/^(g|kg)$/.test(inner.unit) || units === "grams" ? gramsText(q * inner.qty * GRAMS[inner.unit]) : ozText(q * inner.qty * GRAMS[inner.unit]))
+      : (/^(ml|l|dl)$/.test(inner.unit) || units === "grams" ? mlText(q * inner.qty * volumeMl(inner.unit, sys)) : spoons(q * inner.qty * volumeMl(inner.unit, sys), sys)));
     return res;
+  }
+
+  // The "(14 oz)" in "1 (14 oz) can" or "1 can (14 oz)", as an amount.
+  function packageSize(text) {
+    var m = String(text || "").match(new RegExp("^\\s*\\((" + NUM + ")\\s*(fl\\.? ?oz|[A-Za-z]+)\\.?\\)"));
+    var unit = m && unitOf(m[2]);
+    if (!unit) return null;
+    return { qty: toNumber(m[1]), unit: unit, kind: VOLUME[unit] ? "volume" : "weight" };
   }
 
   // "1 large eggs" reads wrong once the count changes.
@@ -407,7 +426,7 @@
   function scale(text, factor, opts) {
     return parse(text).map(function (p) {
       var r = scaleLine(p, factor, opts);
-      r.line = r.amount ? (r.amount + " " + r.name).trim() : r.raw.trim();
+      r.line = r.amount ? (r.prefix + r.amount + " " + r.name).trim() : r.raw.trim();
       return r;
     });
   }

@@ -93,7 +93,7 @@
       b.setAttribute("aria-pressed", state.done[i] ? "true" : "false");
       b.dataset.i = i;
       var box = document.createElement("span"); box.className = "box"; box.textContent = state.done[i] ? "✓" : ""; box.setAttribute("aria-hidden", "true");
-      var amt = document.createElement("span"); amt.className = "amt"; amt.textContent = r.amount;
+      var amt = document.createElement("span"); amt.className = "amt"; amt.textContent = r.prefix + r.amount;
       var what = document.createElement("span"); what.className = "what"; what.textContent = r.name;
       if (r.note) {
         var sm = document.createElement("small");
