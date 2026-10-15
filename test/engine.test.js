@@ -94,3 +94,18 @@ test("plain text copy and share links", () => {
   assert.deepEqual(B.decodeShare(B.encodeShare(s)), s);
   assert.equal(B.decodeShare("not base64!!"), null);
 });
+
+test("a second amount after + scales with the first", () => {
+  assert.equal(line("1/2 cup + 2 tbsp sugar", 1.5).line, "¾ cup + 3 tbsp sugar");
+  assert.equal(line("1 tablespoon + 1 teaspoon vanilla", 1).line, "1 tbsp + 1 tsp vanilla");
+  assert.equal(line("1 lb + 4 oz flour", 2).line, "2 lb 8 oz flour");
+  // Different kinds stay as written rather than being added together.
+  assert.equal(B.parseLine("1 cup + 2 oz cheese").plus, undefined);
+});
+
+test("reads the fraction slash recipe sites paste in", () => {
+  const p = B.parseLine("1⁄2 cup sugar");
+  assert.deepEqual([p.qty, p.unit, p.name], [0.5, "cup", "sugar"]);
+  assert.equal(B.parseLine("1 1⁄2 tsp salt").qty, 1.5);
+  assert.equal(line("1⁄2 cup sugar", 2).line, "1 cup sugar");
+});

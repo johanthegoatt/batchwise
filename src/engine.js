@@ -136,12 +136,28 @@
 
   // ---------------------------------------------------------------- parse
 
+  // Unit word to unit key, or null. A bare "T" is a tablespoon and a bare
+  // "t" a teaspoon, as old recipe cards write them; anything else is
+  // matched case-insensitively.
+  function unitOf(word) {
+    var lower = word.toLowerCase(), k;
+    if (word === "T") return "tbsp";
+    for (k in VOLUME) if (VOLUME[k].test(lower)) return k;
+    for (k in WEIGHT) if (WEIGHT[k].test(lower)) return k;
+    return null;
+  }
+
+  // "1/2 cup + 2 tbsp sugar": a second amount of the same kind, which has
+  // to scale with the first instead of riding along in the name.
+  var PLUS = new RegExp("^\\+\\s*(" + NUM + ")\\s*(fl\\.? ?oz|fluid ounces?|[A-Za-z]+)\\.?(?=\\s|$|,)\\s*(?:of\\s+)?(.*)$");
+
   function parseLine(raw) {
     var line = String(raw || "").replace(/\s+$/, "");
     var out = { raw: line, qty: null, max: null, unit: null, kind: null, name: line.trim() };
     if (!line.trim()) { out.kind = "blank"; return out; }
     if (/:$/.test(line.trim()) && !/\d/.test(line)) { out.kind = "heading"; return out; }
-    var m = line.match(LEAD);
+    // Recipe sites write "1⁄2" with the fraction slash (U+2044), not "/".
+    var m = line.replace(/[\u2044\u2215]/g, "/").match(LEAD);
     if (!m) { out.kind = "text"; return out; }
     out.qty = toNumber(m[1]);
     out.max = m[2] ? toNumber(m[2]) : null;
@@ -157,14 +173,8 @@
     var unitMatch = rest.match(/^(fl\.? ?oz|fluid ounces?|[A-Za-z]+)\.?(?=\s|$|,)\s*(?:of\s+)?(.*)$/);
     var unit = null, name = rest;
     if (unitMatch) {
-      var word = unitMatch[1];
-      var lower = word.toLowerCase();
-      var k;
-      // A bare "T" is a tablespoon and a bare "t" a teaspoon, as old recipe
-      // cards write them; anything else is matched case-insensitively.
-      if (word === "T") unit = "tbsp";
-      else for (k in VOLUME) if (VOLUME[k].test(lower)) { unit = k; break; }
-      if (!unit) for (k in WEIGHT) if (WEIGHT[k].test(lower)) { unit = k; break; }
+      var lower = unitMatch[1].toLowerCase();
+      unit = unitOf(unitMatch[1]);
       if (!unit && COUNTISH.test(lower)) unit = /(ch|sh)es$/.test(lower) ? lower.slice(0, -2) : lower.replace(/s$/, "");
       if (unit) name = unitMatch[2];
     }
@@ -176,7 +186,15 @@
     else out.kind = eggKind(out.name, out.unit === "count" ? null : out.unit) ? "egg" : "count";
     // "1 cup (2 sticks) butter": the bracket says the same amount another
     // way, and it would be wrong once scaled, so it goes.
-    if (out.kind === "volume" || out.kind === "weight") out.name = out.name.replace(/^\([^)]*\)\s*/, "");
+    if (out.kind === "volume" || out.kind === "weight") {
+      var plus = out.max == null && out.name.match(PLUS);
+      var plusUnit = plus && unitOf(plus[2]);
+      if (plusUnit && (out.kind === "volume" ? VOLUME[plusUnit] : WEIGHT[plusUnit]) && toNumber(plus[1]) > 0) {
+        out.plus = { qty: toNumber(plus[1]), unit: plusUnit };
+        out.name = plus[3].trim();
+      }
+      out.name = out.name.replace(/^\([^)]*\)\s*/, "");
+    }
     return out;
   }
 
@@ -307,6 +325,7 @@
 
     if (p.kind === "volume") {
       var ml = q * volumeMl(p.unit, sys), ml2 = q2 != null ? q2 * volumeMl(p.unit, sys) : null;
+      if (p.plus) ml += p.plus.qty * factor * volumeMl(p.plus.unit, sys);
       var gPerMl = dens ? dens.gPerCup / SYSTEMS.us.cup : null;
       if (gPerMl) res.grams = ml * gPerMl;
       if (units === "grams" && gPerMl) res.amount = range(gramsText(ml * gPerMl), ml2 != null && gramsText(ml2 * gPerMl));
@@ -318,6 +337,7 @@
 
     if (p.kind === "weight") {
       var g = q * GRAMS[p.unit], g2 = q2 != null ? q2 * GRAMS[p.unit] : null;
+      if (p.plus) g += p.plus.qty * factor * GRAMS[p.plus.unit];
       res.grams = g;
       if (units === "cups" && dens) {
         var cupMl = g / (dens.gPerCup / SYSTEMS.us.cup);
