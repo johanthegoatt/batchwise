@@ -45,9 +45,23 @@ test("converts to grams with King Arthur's chart", () => {
   assert.equal(line("1 tbsp honey", 1, g).amount, "21 g");
   // Unknown weight per cup falls back to ml rather than guessing.
   assert.equal(line("1 tsp vanilla extract", 1, g).amount, "5 ml");
-  assert.equal(line("1 cup almond flour", 1, g).amount, "235 ml");
+  assert.equal(line("1 cup coconut flour", 1, g).amount, "235 ml");
   // Kosher salt brands differ by almost 2x, so no single weight.
   assert.equal(B.density("kosher salt"), null);
+});
+
+test("the added King Arthur ingredients convert by weight", () => {
+  assert.deepEqual(B.density("almond flour"), { gPerCup: 96, label: "almond flour" });
+  assert.deepEqual(B.density("cornmeal"), { gPerCup: 138, label: "cornmeal" });
+  assert.deepEqual(B.density("cream cheese"), { gPerCup: 227, label: "cream cheese" });
+  assert.deepEqual(B.density("molasses"), { gPerCup: 340, label: "molasses" });
+  assert.deepEqual(B.density("desiccated coconut"), { gPerCup: 85, label: "shredded coconut" });
+  assert.deepEqual(B.density("chopped dates"), { gPerCup: 149, label: "dates" });
+  assert.deepEqual(B.density("applesauce"), { gPerCup: 255, label: "applesauce" });
+  assert.deepEqual(B.density("semolina"), { gPerCup: 163, label: "semolina" });
+  // "cream cheese" must not be read as pouring cream, and coconut flour has
+  // no reliable single weight, so it stays a volume.
+  assert.equal(B.density("coconut flour"), null);
 });
 
 test("converts weights to cups when the ingredient is known", () => {
