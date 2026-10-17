@@ -233,6 +233,65 @@
     return a > 0 && b > 0 ? b / a : NaN;
   }
 
+  // ---------------------------------------------------------- oven heat
+
+  // Recipes name an oven heat in °C, °F or a gas mark, and for a conventional
+  // oven or a fan (convection) one. A fan oven runs hotter for the same dial,
+  // so the usual advice is to set it about 20°C (25°F) lower than a recipe
+  // written for a conventional oven, or keep the heat and cut the time by
+  // roughly a quarter. Gas marks follow the standard British chart.
+  //   Sources: Hoover and AO oven guides (fan = conventional − 20°C),
+  //   Baking Like a Chef (−25°F or −25% time; gas mark °F = mark*25 + 250).
+  var FAN_DROP_C = 20;
+  var GAS_C = { 0.25: 110, 0.5: 120, 1: 140, 2: 150, 3: 170, 4: 180, 5: 190, 6: 200, 7: 220, 8: 230, 9: 240 };
+
+  function cToF(c) { return c * 9 / 5 + 32; }
+  function fToC(f) { return (f - 32) * 5 / 9; }
+  function round5(n) { return Math.round(n / 5) * 5; }
+
+  function gasToC(mark) {
+    if (GAS_C[mark] != null) return GAS_C[mark];
+    // Between or beyond the chart, fall back to the °F formula.
+    return fToC(mark * 25 + 250);
+  }
+  function cToGas(c) {
+    var best = null, diff = Infinity;
+    for (var k in GAS_C) {
+      var d = Math.abs(GAS_C[k] - c);
+      if (d < diff) { diff = d; best = parseFloat(k); }
+    }
+    // Only call it a gas mark if it is close to a real setting.
+    return diff <= 10 ? best : null;
+  }
+  function gasText(mark) {
+    if (mark == null) return null;
+    return mark === 0.25 ? "¼" : mark === 0.5 ? "½" : String(mark);
+  }
+
+  // Convert one oven heat to all the others. `input.unit` is "c", "f" or
+  // "gas"; `input.type` is "conventional" (the default) or "fan", saying what
+  // the number in hand already is. Returns the conventional and fan settings
+  // in every unit, plus a note about trading heat for time.
+  function oven(input) {
+    input = input || {};
+    var unit = input.unit || "c";
+    var type = input.type === "fan" ? "fan" : "conventional";
+    var v = typeof input.value === "number" ? input.value : toNumber(String(input.value));
+    if (!isFinite(v)) return null;
+
+    var c = unit === "f" ? fToC(v) : unit === "gas" ? gasToC(v) : v;
+    // Whatever was given, work out the conventional heat first.
+    var convC = type === "fan" ? c + FAN_DROP_C : c;
+    convC = round5(convC);
+    var fanC = round5(convC - FAN_DROP_C);
+
+    return {
+      conventional: { c: convC, f: round5(cToF(convC)), gas: cToGas(convC), gasText: gasText(cToGas(convC)) },
+      fan: { c: fanC, f: round5(cToF(fanC)) },
+      note: "Or keep it at " + convC + "°C and take about a quarter off the time."
+    };
+  }
+
   // -------------------------------------------------------- friendly text
 
   var FRAC = [[0, ""], [1 / 8, "⅛"], [1 / 4, "¼"], [1 / 3, "⅓"], [1 / 2, "½"], [2 / 3, "⅔"], [3 / 4, "¾"], [1, ""]];
@@ -481,6 +540,9 @@
     density: density,
     panArea: panArea,
     panFactor: panFactor,
+    oven: oven,
+    gasToC: gasToC,
+    cToGas: cToGas,
     spoons: spoons,
     gramsText: gramsText,
     scaleLine: scaleLine,

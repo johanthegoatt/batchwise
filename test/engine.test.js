@@ -134,3 +134,34 @@ test("part of a sized can or package also says the amount to measure", () => {
   assert.equal(line("1 can (400 g) chickpeas", 0.5).note, "about 200 g");
   assert.equal(line("2 (14 oz) cans tomatoes", 1).note, "");
 });
+
+test("oven: converts a conventional celsius heat to the other settings", () => {
+  const o = B.oven({ value: 180, unit: "c" });
+  assert.equal(o.conventional.c, 180);
+  assert.equal(o.conventional.f, 355); // 356 rounded to nearest 5
+  assert.equal(o.conventional.gas, 4);
+  assert.equal(o.fan.c, 160);
+});
+
+test("oven: a fan reading is bumped up to the conventional heat", () => {
+  const o = B.oven({ value: 160, unit: "c", type: "fan" });
+  assert.equal(o.conventional.c, 180);
+  assert.equal(o.fan.c, 160);
+});
+
+test("oven: reads fahrenheit and gas marks", () => {
+  assert.equal(B.oven({ value: 350, unit: "f" }).conventional.c, 175);
+  assert.equal(B.oven({ value: 4, unit: "gas" }).conventional.c, 180);
+  assert.equal(B.gasToC(6), 200);
+});
+
+test("oven: gas mark is only named near a real setting", () => {
+  assert.equal(B.cToGas(180), 4);
+  assert.equal(B.cToGas(205), 6); // within 10 of 200
+  assert.equal(B.cToGas(165), 3); // within 10 of 170
+  assert.equal(B.cToGas(300), null); // nothing close
+});
+
+test("oven: rejects nonsense", () => {
+  assert.equal(B.oven({ value: "warm", unit: "c" }), null);
+});
