@@ -223,3 +223,22 @@ legend { font-weight: 650; padding: 0 6px; }
   .card { box-shadow: none; border: 0; }
   .row { border: 0; border-bottom: 1px solid #ccc; border-radius: 0; background: none; }
 }
+
+/* Oven temperature card: a small side helper, tucked in a details so it stays
+   out of the way until it's wanted. */
+.oven-card > summary { cursor: pointer; font: 700 1.1rem var(--round, inherit); list-style: none; display: flex; align-items: baseline; gap: 8px; }
+.oven-card > summary::-webkit-details-marker { display: none; }
+.oven-card > summary small { font-weight: 500; color: var(--ink-2); font-size: 0.85rem; }
+.oven-card > summary::after { content: "+"; margin-left: auto; color: var(--accent); font-weight: 700; }
+.oven-card[open] > summary::after { content: "\2212"; }
+.oven-in { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+.oven-in .field { flex: 1 1 110px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.oven-in .field span { font-size: 0.82rem; font-weight: 600; color: var(--ink-2); }
+.oven-out { margin-top: 14px; }
+.oven-out:empty { display: none; }
+.oven-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.oven-row:first-child { border-top: 0; }
+.oven-row span { color: var(--ink-2); }
+.oven-row b { font: 700 1rem var(--round, inherit); text-align: right; }
+.oven-note { margin: 10px 0 0; padding: 10px 12px; background: var(--accent-soft); border-radius: 10px; color: var(--ink); font-size: 0.92rem; }
+.oven-none { color: var(--ink-2); margin: 8px 0 0; }

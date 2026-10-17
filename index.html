@@ -100,6 +100,28 @@
     <p class="hint" id="result-hint" hidden>Tap a line to tick it off as it goes in the bowl. Grams come from King Arthur Baking's weight chart.</p>
   </section>
 
+  <details class="card oven-card" id="oven-card">
+    <summary><strong>Oven temperature</strong> <small>fan, gas mark or °F?</small></summary>
+    <p class="hint">Oven not matching the recipe? Put the recipe's heat in and get it for your oven.</p>
+    <div class="oven-in">
+      <label class="field"><span>Heat</span><input id="oven-value" inputmode="numeric" autocomplete="off" placeholder="180"></label>
+      <label class="field"><span>Given in</span>
+        <select id="oven-unit">
+          <option value="c">°C</option>
+          <option value="f">°F</option>
+          <option value="gas">Gas mark</option>
+        </select>
+      </label>
+      <label class="field"><span>Written for</span>
+        <select id="oven-type">
+          <option value="conventional">A normal oven</option>
+          <option value="fan">A fan oven</option>
+        </select>
+      </label>
+    </div>
+    <div id="oven-out" class="oven-out" aria-live="polite"></div>
+  </details>
+
   <p class="toast" id="toast" role="status" aria-live="polite"></p>
 </main>
 
@@ -140,6 +162,7 @@
 
 <script src="src/engine.js"></script>
 <script src="src/scoop.js"></script>
+<script src="src/oven.js"></script>
 <script src="src/app.js"></script>
 </body>
 </html>

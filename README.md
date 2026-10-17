@@ -15,12 +15,15 @@ Scaling a recipe sounds like multiplying by a number. In a kitchen it goes wrong
 - **Cups are different sizes in different countries.** A US cup is 236.6 ml; the UK, Canada, New Zealand and Australia use 250 ml, and an Australian tablespoon is 20 ml, four teaspoons instead of three.
 - **A different pan needs a different amount.** An 8 inch round recipe in a 9 inch round needs about 1.27 times everything, and a 9 inch round into a 13 × 9 tray about 1.8 times ([America's Test Kitchen](https://www.americastestkitchen.com/articles/8002-cake-pan-sizes)).
 - **Eggs don't divide.** A third of a 2 egg recipe is two thirds of an egg.
+- **The oven doesn't match the recipe.** A fan (convection) oven runs hotter for the same dial, so a recipe written for a conventional oven should be set about 20°C (25°F) lower, or kept the same with the time cut by roughly a quarter ([Hoover](https://service.hoover.co.uk/advice-centre/the-oven-is-burning-the-food/151-use-lower-temperatures-when-cooking-with-fan-ovens/), [AO oven guide](https://ao.com/help-and-advice/guides-and-advice/buying-guides/ovens/temperature-guide)). On top of that the heat may be in °C, °F or a gas mark.
 
 ## How it works
 
 1. **Paste the ingredients**, one per line, as the recipe writes them: `2 1/4 cups flour`, `1½ tsp salt`, `200g caster sugar`, `2-3 tbsp milk`, `1 (14 oz) can tomatoes`, `1 stick butter`, `2 large eggs`. Pick where the cups and spoons are from.
 2. **Pick the size**: people (makes 4, I need 6), times (½, ⅓, 1½×, 2×, 3× or any number), or pan (the recipe's pan and yours, from common sizes in inches and cm, or any round, square or rectangle).
 3. **Get the new amounts**, as written, in cups and spoons, or in grams. Tap a line to tick it off as it goes in the bowl. Copy the list, copy a share link, or print it.
+
+There is also an **oven temperature** card: put in the heat a recipe gives, say whether it is °C, °F or a gas mark and which oven it was written for, and read it back for both a normal oven and a fan oven, with a note on trading heat for time.
 
 ### The engine
 
