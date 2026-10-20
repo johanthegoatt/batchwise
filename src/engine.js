@@ -491,6 +491,49 @@
   }
 
   // Scale a whole recipe. Returns one row per input line, in order.
+  // The amount of one ingredient line, in grams and millilitres where it can
+  // be worked out, so two amounts can be compared even in different units.
+  // A weight converts to volume (and the other way) when the ingredient's
+  // density is known from the weight chart; otherwise only its own dimension
+  // is filled in.
+  function baseAmount(line, sys) {
+    if (!line || line.qty == null) return null;
+    sys = sys || "us";
+    var dens = density(line.name);
+    var gPerMl = dens ? dens.gPerCup / SYSTEMS.us.cup : null;
+    if (line.kind === "weight") {
+      var g = line.qty * GRAMS[line.unit];
+      return { grams: g, ml: gPerMl ? g / gPerMl : null };
+    }
+    if (line.kind === "volume") {
+      var ml = line.qty * volumeMl(line.unit, sys);
+      return { ml: ml, grams: gPerMl ? ml * gPerMl : null };
+    }
+    if (line.kind === "egg") return { count: line.qty, grams: line.qty * EGG.whole.g };
+    return { count: line.qty };
+  }
+
+  // How much to scale the whole recipe by so that one ingredient comes out at
+  // the amount you actually have. You pick the ingredient line, say how much of
+  // it is in the cupboard (e.g. 300 g of flour when the recipe wants 2 cups),
+  // and this returns the factor to pass to scale(). It matches on weight first,
+  // then volume, then a plain count, converting between weight and volume when
+  // the ingredient's density is known. Returns null when the two amounts can't
+  // be compared (a count against a weight, say), so the page can explain.
+  function factorFromHave(recipeLine, haveQty, haveUnit, sys) {
+    sys = sys || "us";
+    var n = toNumber(String(haveQty));
+    if (!(n > 0)) return null;
+    var name = (recipeLine && recipeLine.name) || "x";
+    var have = parseLine(String(n) + " " + String(haveUnit || "") + " " + name);
+    var a = baseAmount(recipeLine, sys), b = baseAmount(have, sys);
+    if (!a || !b) return null;
+    if (a.grams > 0 && b.grams > 0) return b.grams / a.grams;
+    if (a.ml > 0 && b.ml > 0) return b.ml / a.ml;
+    if (a.count > 0 && b.count > 0) return b.count / a.count;
+    return null;
+  }
+
   function scale(text, factor, opts) {
     return parse(text).map(function (p) {
       var r = scaleLine(p, factor, opts);
@@ -540,6 +583,8 @@
     density: density,
     panArea: panArea,
     panFactor: panFactor,
+    baseAmount: baseAmount,
+    factorFromHave: factorFromHave,
     oven: oven,
     gasToC: gasToC,
     cToGas: cToGas,
