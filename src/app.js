@@ -31,7 +31,7 @@
   };
 
   var state = {
-    t: "", r: "", s: "us", m: "serves", from: 4, to: 6, f: 2,
+    t: "", r: "", s: "us", m: "serves", from: 4, to: 6, f: 2, hi: 0, hq: "", hu: "g",
     pf: "r8", pt: "r9", po: { from: { shape: "round", a: 8, b: 8, u: "in" }, to: { shape: "round", a: 9, b: 9, u: "in" } },
     u: "as", done: {}
   };
@@ -55,9 +55,47 @@
     return { shape: o.shape, a: +o.a * k, b: +o.b * k };
   }
 
+  // The recipe lines you could scale to: the ones with an amount and a name.
+  function haveLines() {
+    return B.parse(state.r)
+      .map(function (p, i) { return { i: i, p: p }; })
+      .filter(function (x) { return x.p.qty != null && x.p.name && x.p.kind !== "text" && x.p.kind !== "heading" && x.p.kind !== "blank"; });
+  }
+
+  function haveFactor() {
+    var lines = haveLines();
+    if (!lines.length) return NaN;
+    var pick = lines.filter(function (x) { return x.i === state.hi; })[0] || lines[0];
+    var f = B.factorFromHave(pick.p, state.hq, state.hu, state.s);
+    return f == null ? NaN : f;
+  }
+
+  function fillHave() {
+    var sel = $("have-ing");
+    if (!sel) return;
+    var lines = haveLines();
+    if (!lines.filter(function (x) { return x.i === state.hi; }).length && lines.length) state.hi = lines[0].i;
+    sel.textContent = "";
+    lines.forEach(function (x) {
+      var o = document.createElement("option");
+      o.value = String(x.i);
+      o.textContent = x.p.name;
+      o.selected = x.i === state.hi;
+      sel.appendChild(o);
+    });
+    if (!lines.length) {
+      var o2 = document.createElement("option");
+      o2.textContent = "paste a recipe first";
+      sel.appendChild(o2);
+    }
+    $("have-qty").value = state.hq;
+    $("have-unit").value = state.hu;
+  }
+
   function factor() {
     if (state.m === "serves") return state.from > 0 && state.to > 0 ? state.to / state.from : NaN;
     if (state.m === "times") return +state.f;
+    if (state.m === "have") return haveFactor();
     return B.panFactor(panOf("from"), panOf("to"));
   }
 
@@ -75,6 +113,14 @@
   function render(reason) {
     var f = factor();
     $("factor").textContent = factorText(f);
+    var hh = $("have-hint");
+    if (hh) {
+      if (state.m !== "have") hh.textContent = "";
+      else if (!haveLines().length) hh.textContent = "Paste a recipe first, then pick an ingredient you have.";
+      else if (!(state.hq > 0)) hh.textContent = "Type how much of it is in the cupboard.";
+      else if (!isFinite(f) || f <= 0) hh.textContent = "I can't match that unit to this ingredient. Try the unit the recipe uses, or grams.";
+      else hh.textContent = "";
+    }
     var rows = isFinite(f) && f > 0 ? B.scale(state.r, f, { system: state.s, units: state.u, showGrams: state.u === "as" }) : [];
     var items = rows.filter(function (r) { return r.kind !== "blank"; });
     var list = $("list");
@@ -130,6 +176,7 @@
     state.m = m;
     document.querySelectorAll(".mode").forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.mode === m)); });
     document.querySelectorAll(".pane").forEach(function (p) { p.hidden = p.dataset.pane !== m; });
+    if (m === "have") fillHave();
     syncChips();
   }
 
@@ -211,7 +258,7 @@
   }
 
   function shareState() {
-    return { t: state.t, r: state.r, s: state.s, m: state.m, from: state.from, to: state.to, f: state.f, pf: state.pf, pt: state.pt, po: state.po, u: state.u };
+    return { t: state.t, r: state.r, s: state.s, m: state.m, from: state.from, to: state.to, f: state.f, hi: state.hi, hq: state.hq, hu: state.hu, pf: state.pf, pt: state.pt, po: state.po, u: state.u };
   }
 
   function fillInputs() {
@@ -237,7 +284,7 @@
     state.r = $("recipe").value;
     state.done = {};
     clearTimeout(pasteTimer);
-    pasteTimer = setTimeout(function () { render("paste"); }, 250);
+    pasteTimer = setTimeout(function () { if (state.m === "have") fillHave(); render("paste"); }, 250);
   });
   $("title").addEventListener("input", function () { state.t = $("title").value; save(); });
   $("system").addEventListener("change", function () {
@@ -263,6 +310,9 @@
     });
   });
   $("times").addEventListener("input", function () { state.f = +$("times").value; syncChips(); render("size"); S.react("factor", { f: factor() }); });
+  $("have-qty").addEventListener("input", function () { state.hq = $("have-qty").value; render("size"); });
+  $("have-unit").addEventListener("change", function () { state.hu = $("have-unit").value; render("size"); });
+  $("have-ing").addEventListener("change", function () { state.hi = +$("have-ing").value; render("size"); });
   document.querySelectorAll(".chip").forEach(function (c) {
     c.addEventListener("click", function () {
       state.f = +c.dataset.f; $("times").value = Math.round(state.f * 100) / 100; syncChips(); render("size");

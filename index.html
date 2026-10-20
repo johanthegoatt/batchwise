@@ -45,6 +45,7 @@
       <button type="button" role="tab" class="mode" data-mode="serves" aria-selected="true">People</button>
       <button type="button" role="tab" class="mode" data-mode="times" aria-selected="false">Times</button>
       <button type="button" role="tab" class="mode" data-mode="pan" aria-selected="false">Pan</button>
+      <button type="button" role="tab" class="mode" data-mode="have" aria-selected="false">I have</button>
     </div>
 
     <div class="pane" data-pane="serves">
@@ -78,6 +79,28 @@
         </fieldset>
       </div>
       <p class="hint" id="pan-hint"></p>
+    </div>
+
+    <div class="pane" data-pane="have" hidden>
+      <div class="have">
+        <label>I have <input type="number" id="have-qty" min="0" step="any" inputmode="decimal" placeholder="300"></label>
+        <label class="have-unit"><span class="sr-only">Unit</span>
+          <select id="have-unit">
+            <option value="g">grams</option>
+            <option value="kg">kg</option>
+            <option value="oz">oz</option>
+            <option value="lb">lb</option>
+            <option value="cup">cups</option>
+            <option value="tbsp">tbsp</option>
+            <option value="tsp">tsp</option>
+            <option value="ml">ml</option>
+            <option value="l">litres</option>
+            <option value="">of them</option>
+          </select>
+        </label>
+        <label>of <select id="have-ing"></select></label>
+      </div>
+      <p class="hint" id="have-hint"></p>
     </div>
 
     <p class="factor" id="factor" aria-live="polite"></p>

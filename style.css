@@ -108,6 +108,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .mode { border: 0; background: none; border-radius: 999px; padding: 8px 18px; min-height: 40px; cursor: pointer; font-weight: 650; color: var(--ink-2); }
 .mode[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.have { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.have label { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.have input { width: 6rem; text-align: center; font-weight: 700; font-size: 1.1rem; }
+.have select { font: inherit; padding: 8px 10px; }
 .serves { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
 .serves label, .times-in { display: flex; align-items: center; gap: 8px; font-weight: 600; }
 .serves input, .times-in input { width: 6rem; text-align: center; font-weight: 700; font-size: 1.1rem; }
