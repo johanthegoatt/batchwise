@@ -20,7 +20,7 @@ Scaling a recipe sounds like multiplying by a number. In a kitchen it goes wrong
 ## How it works
 
 1. **Paste the ingredients**, one per line, as the recipe writes them: `2 1/4 cups flour`, `1½ tsp salt`, `200g caster sugar`, `2-3 tbsp milk`, `1 (14 oz) can tomatoes`, `1 stick butter`, `2 large eggs`. Pick where the cups and spoons are from.
-2. **Pick the size**: people (makes 4, I need 6), times (½, ⅓, 1½×, 2×, 3× or any number), or pan (the recipe's pan and yours, from common sizes in inches and cm, or any round, square or rectangle).
+2. **Pick the size**: people (makes 4, I need 6), times (½, ⅓, 1½×, 2×, 3× or any number), pan (the recipe's pan and yours, from common sizes in inches and cm, or any round, square or rectangle), or **I have**: pick an ingredient, say how much is in the cupboard (300 g of flour when the recipe wants 2 cups), and the whole recipe scales to fit it. It matches on weight, volume or a plain count, converting between weight and volume when the ingredient's density is known, so grams on hand work against a recipe written in cups.
 3. **Get the new amounts**, as written, in cups and spoons, or in grams. Tap a line to tick it off as it goes in the bowl. Copy the list, copy a share link, or print it.
 
 There is also an **oven temperature** card: put in the heat a recipe gives, say whether it is °C, °F or a gas mark and which oven it was written for, and read it back for both a normal oven and a fan oven, with a note on trading heat for time.
