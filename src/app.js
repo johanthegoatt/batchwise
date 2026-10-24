@@ -33,6 +33,7 @@
   var state = {
     t: "", r: "", s: "us", m: "serves", from: 4, to: 6, f: 2, hi: 0, hq: "", hu: "g",
     pf: "r8", pt: "r9", po: { from: { shape: "round", a: 8, b: 8, u: "in" }, to: { shape: "round", a: 9, b: 9, u: "in" } },
+    bm: "",
     u: "as", done: {}
   };
 
@@ -113,6 +114,7 @@
   function render(reason) {
     var f = factor();
     $("factor").textContent = factorText(f);
+    panHint();
     var hh = $("have-hint");
     if (hh) {
       if (state.m !== "have") hh.textContent = "";
@@ -235,10 +237,25 @@
   }
 
   function panHint() {
+    var isPan = state.m === "pan";
     var f = factor();
-    $("pan-hint").textContent = state.m === "pan" && isFinite(f)
-      ? "This keeps the batter the same depth. A different pan bakes at a different speed, so start checking it a few minutes early."
+    $("pan-hint").textContent = isPan && isFinite(f)
+      ? "This keeps the batter the same depth. A different pan bakes at a different speed, so check the bake-time box below for a guide."
       : "";
+    var note = $("bake-note");
+    if (!note) return;
+    var mins = B.toNumber(String(state.bm));
+    if (!isPan || !(mins > 0)) { note.textContent = ""; return; }
+    var b = B.panBake(panOf("from"), panOf("to"), mins);
+    if (!b) { note.textContent = ""; return; }
+    if (b.split) {
+      note.textContent = "That's a big change in depth. It's safer to split the batter between two pans (or scale it) than stretch one bake. Rough guide: " + b.low + "–" + b.high + " min, checking from " + b.checkAt + " min.";
+    } else if (b.direction === "same") {
+      note.textContent = "Same depth, so about the same time (" + b.estimate + " min). Check it's done at the centre before taking it out.";
+    } else {
+      var word = b.deeper ? "deeper, so it needs a bit longer" : "shallower, so it bakes faster";
+      note.textContent = "Your pan is " + word + ". Reckon on about " + b.low + "–" + b.high + " min (from your " + Math.round(mins) + "), and start checking at " + b.checkAt + " min.";
+    }
   }
 
   function toast(text) {
@@ -268,6 +285,7 @@
     $("from-serves").value = state.from;
     $("to-serves").value = state.to;
     $("times").value = state.f;
+    if ($("bake-mins")) $("bake-mins").value = state.bm || "";
     document.querySelector('input[name="units"][value="' + state.u + '"]').checked = true;
     setMode(state.m);
     buildPan("from");
@@ -310,6 +328,8 @@
     });
   });
   $("times").addEventListener("input", function () { state.f = +$("times").value; syncChips(); render("size"); S.react("factor", { f: factor() }); });
+  var bakeMins = $("bake-mins");
+  if (bakeMins) bakeMins.addEventListener("input", function () { state.bm = bakeMins.value; save(); panHint(); });
   $("have-qty").addEventListener("input", function () { state.hq = $("have-qty").value; render("size"); });
   $("have-unit").addEventListener("change", function () { state.hu = $("have-unit").value; render("size"); });
   $("have-ing").addEventListener("change", function () { state.hi = +$("have-ing").value; render("size"); });
