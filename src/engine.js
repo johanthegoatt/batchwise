@@ -233,6 +233,42 @@
     return a > 0 && b > 0 ? b / a : NaN;
   }
 
+  // Keeping the SAME batter and just swapping the pan changes how deep it sits,
+  // and that changes the bake time: a wider pan spreads it thinner so it bakes
+  // faster, a narrower one makes it deeper so it bakes slower. The common
+  // mistake is to keep the recipe's time unchanged. There's no exact formula
+  // (King Arthur put a deeper 10-cup Bundt at about +30%; Bake Club's rule is
+  // to start checking a larger tin 10-15 min early), so this gives a direction,
+  // an estimate and a time to start checking, not a false-precise number.
+  //
+  // depthRatio = new depth / old depth = old area / new area. Part of a bake is
+  // the edges and crust setting at a rate the oven fixes, and part is heat
+  // reaching the centre, which scales with depth; so the time moves by a little
+  // over half of the depth change. Past a big jump, splitting the batter
+  // between pans (or scaling it) is the honest answer.
+  function panBake(from, to, minutes) {
+    var m = typeof minutes === "number" ? minutes : toNumber(String(minutes));
+    var area = panArea(from), areaTo = panArea(to);
+    if (!(area > 0) || !(areaTo > 0) || !(m > 0)) return null;
+    var depthRatio = area / areaTo;
+    var split = depthRatio > 2.2 || depthRatio < 0.45;
+    var damp = Math.max(0.45, Math.min(2.2, depthRatio));
+    var est = m * (1 + 0.6 * (damp - 1));
+    var dir = depthRatio > 1.05 ? "longer" : depthRatio < 0.95 ? "shorter" : "same";
+    return {
+      depthRatio: depthRatio,
+      deeper: depthRatio > 1,
+      direction: dir,
+      estimate: Math.round(est),
+      low: Math.round(est * 0.9),
+      high: Math.round(est * 1.1),
+      // Open the oven to check at the earlier of the estimate and the original
+      // time, minus a few minutes, so a faster bake isn't missed.
+      checkAt: Math.max(5, Math.round(Math.min(est, m) - 5)),
+      split: split
+    };
+  }
+
   // ---------------------------------------------------------- oven heat
 
   // Recipes name an oven heat in °C, °F or a gas mark, and for a conventional
@@ -583,6 +619,7 @@
     density: density,
     panArea: panArea,
     panFactor: panFactor,
+    panBake: panBake,
     baseAmount: baseAmount,
     factorFromHave: factorFromHave,
     oven: oven,
