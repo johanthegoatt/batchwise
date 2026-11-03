@@ -149,6 +149,21 @@
     <div id="oven-out" class="oven-out" aria-live="polite"></div>
   </details>
 
+  <details class="card oven-card" id="altitude-card">
+    <summary><strong>High-altitude baking</strong> <small>above 3,000 ft?</small></summary>
+    <p class="hint">Cakes sinking in the middle up a mountain? Put in how high you are and get the usual adjustments.</p>
+    <div class="oven-in">
+      <label class="field"><span>Elevation</span><input id="alt-value" inputmode="numeric" autocomplete="off" placeholder="5000"></label>
+      <label class="field"><span>In</span>
+        <select id="alt-unit">
+          <option value="ft">feet</option>
+          <option value="m">metres</option>
+        </select>
+      </label>
+    </div>
+    <div id="alt-out" class="oven-out" aria-live="polite"></div>
+  </details>
+
   <p class="toast" id="toast" role="status" aria-live="polite"></p>
 </main>
 
@@ -190,6 +205,7 @@
 <script src="src/engine.js"></script>
 <script src="src/scoop.js"></script>
 <script src="src/oven.js"></script>
+<script src="src/altitude.js"></script>
 <script src="src/app.js"></script>
 </body>
 </html>
