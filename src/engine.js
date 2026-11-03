@@ -328,6 +328,51 @@
     };
   }
 
+  // ------------------------------------------------------- high altitude
+
+  // Above about 3,000 ft the lower air pressure changes baking: gases expand
+  // more so cakes rise too fast and then collapse, and water boils cooler so
+  // things dry out. The fixes are to hold the rise back and keep more moisture
+  // in: a little less baking powder/soda, a little less sugar, a little more
+  // liquid, and a hotter oven to set the structure before it over-rises. The
+  // amounts are starting points, given as ranges because every recipe differs;
+  // the standing advice is to change one thing at a time and test. Figures are
+  // the consolidated chart from Colorado State University Extension and King
+  // Arthur Baking (bands at ~3,000 / 5,000 / 6,500 ft).
+  var FT_PER_M = 3.280839895;
+  var ALT_BANDS = [
+    { min: 0, max: 3000, label: "Under 3,000 ft (900 m)", bpTsp: [0, 0], sugarTbsp: [0, 0], liquidTbsp: [0, 0], ovenF: [0, 0], change: false },
+    { min: 3000, max: 5000, label: "3,000–5,000 ft (900–1,500 m)", bpTsp: [0, 0.125], sugarTbsp: [0, 1], liquidTbsp: [1, 2], ovenF: [15, 25], change: true },
+    { min: 5000, max: 6500, label: "5,000–6,500 ft (1,500–2,000 m)", bpTsp: [0.125, 0.25], sugarTbsp: [0, 2], liquidTbsp: [2, 4], ovenF: [15, 25], change: true },
+    { min: 6500, max: Infinity, label: "Above 6,500 ft (2,000 m)", bpTsp: [0.25, 0.25], sugarTbsp: [1, 3], liquidTbsp: [3, 4], ovenF: [15, 25], change: true }
+  ];
+
+  // Adjustments for a given elevation. `input.unit` is "ft" (default) or "m".
+  // Baking powder is per teaspoon the recipe calls for, sugar per cup, liquid
+  // per cup; oven as degrees to raise the dial. Returns null for a bad number.
+  function altitude(input) {
+    input = input || {};
+    var v = typeof input.value === "number" ? input.value : toNumber(String(input.value));
+    if (!isFinite(v) || v < 0) return null;
+    var feet = input.unit === "m" ? v * FT_PER_M : v;
+    var band = ALT_BANDS[0];
+    for (var i = 0; i < ALT_BANDS.length; i++) {
+      if (feet >= ALT_BANDS[i].min && feet < ALT_BANDS[i].max) { band = ALT_BANDS[i]; break; }
+    }
+    var ovenC = band.ovenF[0] ? [Math.round(band.ovenF[0] * 5 / 9), Math.round(band.ovenF[1] * 5 / 9)] : [0, 0];
+    return {
+      feet: Math.round(feet),
+      metres: Math.round(feet / FT_PER_M),
+      band: band.label,
+      change: band.change,
+      bakingPowderPerTsp: band.bpTsp, // teaspoons less, per tsp called for
+      sugarPerCup: band.sugarTbsp,    // tablespoons less, per cup
+      liquidPerCup: band.liquidTbsp,  // tablespoons more, per cup
+      ovenF: band.ovenF,              // degrees F hotter
+      ovenC: ovenC                    // degrees C hotter
+    };
+  }
+
   // -------------------------------------------------------- friendly text
 
   var FRAC = [[0, ""], [1 / 8, "⅛"], [1 / 4, "¼"], [1 / 3, "⅓"], [1 / 2, "½"], [2 / 3, "⅔"], [3 / 4, "¾"], [1, ""]];
@@ -623,6 +668,7 @@
     baseAmount: baseAmount,
     factorFromHave: factorFromHave,
     oven: oven,
+    altitude: altitude,
     gasToC: gasToC,
     cToGas: cToGas,
     spoons: spoons,

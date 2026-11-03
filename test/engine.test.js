@@ -165,3 +165,35 @@ test("oven: gas mark is only named near a real setting", () => {
 test("oven: rejects nonsense", () => {
   assert.equal(B.oven({ value: "warm", unit: "c" }), null);
 });
+
+test("altitude: under 3,000 ft needs no change", () => {
+  const a = B.altitude({ value: 1000, unit: "ft" });
+  assert.equal(a.change, false);
+  assert.deepEqual(a.bakingPowderPerTsp, [0, 0]);
+  assert.deepEqual(a.ovenF, [0, 0]);
+});
+
+test("altitude: high elevation reduces leavening, adds liquid, raises the oven", () => {
+  const a = B.altitude({ value: 7000, unit: "ft" });
+  assert.equal(a.change, true);
+  assert.deepEqual(a.bakingPowderPerTsp, [0.25, 0.25]);
+  assert.deepEqual(a.liquidPerCup, [3, 4]);
+  assert.deepEqual(a.ovenF, [15, 25]);
+  assert.equal(a.ovenC[0], 8); // 15F ~ 8C
+});
+
+test("altitude: the mid band sits between the others", () => {
+  const a = B.altitude({ value: 5500, unit: "ft" });
+  assert.deepEqual(a.sugarPerCup, [0, 2]);
+  assert.deepEqual(a.liquidPerCup, [2, 4]);
+});
+
+test("altitude: metres convert to feet", () => {
+  const a = B.altitude({ value: 2000, unit: "m" }); // ~6562 ft -> top band
+  assert.equal(a.feet, 6562);
+  assert.deepEqual(a.bakingPowderPerTsp, [0.25, 0.25]);
+});
+
+test("altitude: rejects nonsense", () => {
+  assert.equal(B.altitude({ value: "high", unit: "ft" }), null);
+});
