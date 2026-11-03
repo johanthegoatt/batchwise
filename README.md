@@ -26,6 +26,8 @@ Scaling a recipe sounds like multiplying by a number. In a kitchen it goes wrong
 
 There is also an **oven temperature** card: put in the heat a recipe gives, say whether it is °C, °F or a gas mark and which oven it was written for, and read it back for both a normal oven and a fan oven, with a note on trading heat for time.
 
+And a **high-altitude baking** card: put in how high you are and read back the usual starting adjustments above 3,000 ft, where lower air pressure makes cakes over-rise and dry out. It gives a little less baking powder/soda and sugar, a little more liquid and a hotter oven, in bands at ~3,000 / 5,000 / 6,500 ft, as ranges, with the standing advice to change one thing at a time. Figures from [Colorado State University Extension](https://extension.colostate.edu/topic-areas/nutrition-food-safety-health/high-altitude-food-preparation-p41/) and [King Arthur Baking](https://www.kingarthurbaking.com/learn/high-altitude-baking).
+
 ### The engine
 
 `src/engine.js` has no DOM, so the page and the tests run the same code.
