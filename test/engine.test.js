@@ -197,3 +197,27 @@ test("altitude: metres convert to feet", () => {
 test("altitude: rejects nonsense", () => {
   assert.equal(B.altitude({ value: "high", unit: "ft" }), null);
 });
+
+test("yeast: instant to active dry needs about a quarter more", () => {
+  const r = B.yeastConvert(7, "instant", "active");
+  assert.ok(Math.abs(r.grams - 8.75) < 1e-9);
+  assert.strictEqual(r.bloom, true); // active dry should be bloomed first
+});
+
+test("yeast: instant to fresh is about three times the weight", () => {
+  assert.ok(Math.abs(B.yeastConvert(7, "instant", "fresh").grams - 21) < 1e-9);
+});
+
+test("yeast: fresh back to instant is a third", () => {
+  assert.ok(Math.abs(B.yeastConvert(21, "fresh", "instant").grams - 7) < 1e-9);
+  assert.strictEqual(B.yeastConvert(21, "fresh", "instant").bloom, false);
+});
+
+test("yeast: same type is unchanged", () => {
+  assert.strictEqual(B.yeastConvert(10, "active", "active").grams, 10);
+});
+
+test("yeast: bad input and unknown types return null", () => {
+  assert.strictEqual(B.yeastConvert("", "instant", "fresh"), null);
+  assert.strictEqual(B.yeastConvert(5, "instant", "nope"), null);
+});
