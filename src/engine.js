@@ -656,8 +656,41 @@
     } catch (e) { return null; }
   }
 
+  // Yeast comes in three forms that aren't interchangeable gram for gram.
+  // Instant (sold as fast-action, rapid-rise or bread-machine yeast) is the
+  // strongest; active dry needs about a quarter more; fresh (cake or compressed)
+  // yeast needs about three times as much. The usual baking ratio is
+  // 1 instant : 1.25 active dry : 3 fresh by weight (King Arthur Baking; SAF).
+  // Instant goes straight into the flour; active dry is best dissolved in warm
+  // liquid first; fresh is crumbled into the liquid.
+  var YEAST = {
+    instant: { label: "Instant / fast-action", w: 1, bloom: false },
+    active:  { label: "Active dry",            w: 1.25, bloom: true },
+    fresh:   { label: "Fresh / cake",          w: 3, bloom: true }
+  };
+
+  function yeastConvert(amount, from, to) {
+    var a = toNumber(amount);
+    var f = YEAST[from], t = YEAST[to];
+    if (a == null || !(a >= 0) || !f || !t) return null;
+    var grams = a * (t.w / f.w);
+    return {
+      grams: Math.round(grams * 100) / 100,
+      from: from, to: to,
+      fromLabel: f.label, toLabel: t.label,
+      bloom: t.bloom,
+      note: !t.bloom
+        ? "Instant yeast can go straight into the dry ingredients."
+        : to === "fresh"
+          ? "Crumble fresh yeast into the warm liquid before mixing."
+          : "Dissolve active dry yeast in a little warm liquid (not hot) for a few minutes first."
+    };
+  }
+
   return {
     SYSTEMS: SYSTEMS,
+    YEAST: YEAST,
+    yeastConvert: yeastConvert,
     parse: parse,
     parseLine: parseLine,
     toNumber: toNumber,
