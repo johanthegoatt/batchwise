@@ -164,6 +164,29 @@
     <div id="alt-out" class="oven-out" aria-live="polite"></div>
   </details>
 
+  <details class="card oven-card" id="yeast-card">
+    <summary><strong>Yeast swap</strong> <small>instant, active dry or fresh?</small></summary>
+    <p class="hint">Only have one kind of yeast? Put in the amount and the two types to get the right weight.</p>
+    <div class="oven-in">
+      <label class="field"><span>Amount (g)</span><input id="yeast-value" inputmode="decimal" autocomplete="off" placeholder="7"></label>
+      <label class="field"><span>You have</span>
+        <select id="yeast-from">
+          <option value="instant">Instant / fast-action</option>
+          <option value="active">Active dry</option>
+          <option value="fresh">Fresh / cake</option>
+        </select>
+      </label>
+      <label class="field"><span>Recipe wants</span>
+        <select id="yeast-to">
+          <option value="active">Active dry</option>
+          <option value="instant">Instant / fast-action</option>
+          <option value="fresh">Fresh / cake</option>
+        </select>
+      </label>
+    </div>
+    <div id="yeast-out" class="oven-out" aria-live="polite"></div>
+  </details>
+
   <p class="toast" id="toast" role="status" aria-live="polite"></p>
 </main>
 
@@ -206,6 +229,7 @@
 <script src="src/scoop.js"></script>
 <script src="src/oven.js"></script>
 <script src="src/altitude.js"></script>
+<script src="src/yeast.js"></script>
 <script src="src/app.js"></script>
 </body>
 </html>
